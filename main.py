@@ -3,6 +3,9 @@ if not sys.getfilesystemencoding():
     sys.getfilesystemencoding = lambda: 'UTF-8'
 import os
 
+import numpy as np
+
+
 os.environ['ETS_TOOLKIT'] = 'qt4'
 
 import imp
@@ -12,7 +15,11 @@ try:
 except ImportError:
     os.environ['QT_API'] = 'pyqt'  # signal to pyface that PyQt4 should be used
 
+
 from pyface.qt import QtGui, QtCore
+from visualization import MatplotlibExample,MayaviExample
+
+
 
 if os.path.exists(__file__+'/DEBUG'): # if there is a file DEBUG in the main folder the program will run in debug mode
     DEBUG = True
@@ -93,6 +100,23 @@ class SomeButtonWidget(QtGui.QWidget):
     def click_event(self):
         print('button was clicked')
 
+    def update_tab(self):
+        print('buttons are updated, which means nothing is done')
+
+class MayaviQWidget(QtGui.QWidget):
+    def __init__(self, visualization,parent=None):
+        super().__init__(parent=parent)
+        layout = QtGui.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self.visualization = visualization
+        self.ui = self.visualization.edit_traits(parent=self,
+                                                 kind='subpanel').control
+        layout.addWidget(self.ui)
+        self.ui.setParent(self)
+
+    def update_tab(self):
+        self.visualization.update_plot()
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -105,24 +129,31 @@ class MainWindow(QtGui.QMainWindow):
         self.error_dialog.resize(700, 600)
         # error dialog can be used with self.error_dialog.showMessage(string)
 
-        self.layout = QtGui.QVBoxLayout(self.main_widget)
+        self.layout = QtGui.QVBoxLayout(self.main_widget) # QVBoxLayout is a vertical layout.
+        # use QHBoxLayout for horizontal layout
 
-        self.tabWidget = QtGui.QTabWidget()
+        self.tabWidget = QtGui.QTabWidget(self.main_widget)
         self.tabWidget.currentChanged.connect(self.tab_is_changed)
         self.layout.addWidget(self.tabWidget)
 
         self.button_widget = SomeButtonWidget(self)
-        self.button_widget2 = SomeButtonWidget(self)
+        self.matplotlib_example = MatplotlibExample()
+        mayavi_example = MayaviExample()
+        self.mayavi_widget = MayaviQWidget(mayavi_example,parent=self)
 
-        self.tabWidget.addTab(self.button_widget,'Some Buttons')
-        self.tabWidget.addTab(self.button_widget2,'More Buttons')
-
+        self.tabWidget.addTab(self.button_widget,'Some buttons')
+        self.tabWidget.addTab(self.matplotlib_example,'matplotlib')
+        self.tabWidget.addTab(self.mayavi_widget,'Mayavi')
 
         self.setWindowTitle("this is a template")
         # self.setWindowIcon(QtGui.QIcon('icon.ico'))
         self.setMinimumSize(700, 700)
         self.resize(1000, 900)
         self.setCentralWidget(self.main_widget)
+
+        self.plot_timer = QtCore.QTimer()
+        self.plot_timer.timeout.connect(self.update_selected_tab)
+        self.plot_timer.start(1000)
 
         self.show()
 
@@ -135,12 +166,16 @@ class MainWindow(QtGui.QMainWindow):
             app.quit()
             sys.exit()
 
+    def update_selected_tab(self):
+        self.tabWidget.currentWidget().update_tab()
+
     def tab_is_changed(self, i):
         print('tab {} is selected'.format(i))
 
 
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication.instance() # Use this if mayavi is imported
+    # app = QtGui.QApplication # use this if you don't import mayavi
     main = MainWindow()
 
     app.exec_()
