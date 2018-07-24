@@ -19,6 +19,7 @@ if os.path.exists(__file__+'/DEBUG'): # if there is a file DEBUG in the main fol
 else:
     DEBUG = False
 
+
 class EntryWithLabel(QtGui.QWidget):
     def __init__(self, parent, label, value=None, width_text=200, width_label=90,tooltip=None):
         QtGui.QWidget.__init__(self, parent)
@@ -117,7 +118,7 @@ class MainWindow(QtGui.QMainWindow):
         self.tabWidget.addTab(self.button_widget2,'More Buttons')
 
 
-        # self.setWindowTitle("Marcel codet")
+        self.setWindowTitle("this is a template")
         # self.setWindowIcon(QtGui.QIcon('icon.ico'))
         self.setMinimumSize(700, 700)
         self.resize(1000, 900)
