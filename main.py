@@ -14,7 +14,7 @@ except ImportError:
 
 from pyface.qt import QtGui, QtCore
 
-if os.path.exists(__file__+'/DEBUG'):
+if os.path.exists(__file__+'/DEBUG'): # if there is a file DEBUG in the main folder the program will run in debug mode
     DEBUG = True
 else:
     DEBUG = False
@@ -81,7 +81,16 @@ class LabeledLabel(QtGui.QWidget):
 class SomeButtonWidget(QtGui.QWidget):
     def __init__(self,parent=None):
         super().__init__(parent)
+        layout = QtGui.QHBoxLayout(self)
+        self.buttons = []
+        for i in range(5):
+            button = QtGui.QPushButton('{}'.format(i))
+            button.clicked.connect(self.click_event)
+            button.setFixedHeight(50)
+            layout.addWidget(button)
 
+    def click_event(self):
+        print('button was clicked')
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -127,6 +136,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def tab_is_changed(self, i):
         print('tab {} is selected'.format(i))
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
