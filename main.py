@@ -165,6 +165,8 @@ class MainWindow(QtGui.QMainWindow):
         if DEBUG or reply == QtGui.QMessageBox.Yes:
             app.quit()
             sys.exit()
+        else:
+            event.ignore()
 
     def update_selected_tab(self):
         self.tabWidget.currentWidget().update_tab()
